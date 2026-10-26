@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Lunar</title>
+
+    <!-- PyScript -->
+    <link rel="stylesheet"
+          href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module"
+            src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #30104b;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 500px;
+            min-height: 600px;
+            padding: 30px 20px;
+            background: darkviolet;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 20px #160521;
+        }
+
+        h1 {
+            font-size: 30px;
+            margin: 35px 0;
+        }
+
+        #pregunta {
+            font-size: 20px;
+            line-height: 1.5;
+            margin: 30px 0;
+        }
+
+        #contador {
+            font-size: 17px;
+        }
+
+        .respuestas {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button {
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .respuesta {
+            background: white;
+            color: #30104b;
+            font-weight: bold;
+        }
+
+        .respuesta:hover:not(:disabled) {
+            background: #e4c6ff;
+            transform: scale(1.02);
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .principal {
+            background: #f1dcff;
+            color: #30104b;
+            font-weight: bold;
+            padding: 15px 25px;
+            margin-top: 25px;
+        }
+
+        .principal:hover {
+            background: white;
+        }
+
+        #resultado {
+            font-size: 21px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .oculto {
+            display: none;
+        }
+
+        .correcto {
+            color: #7dff9a;
+        }
+
+        .incorrecto {
+            color: #ffb3b3;
+        }
+
+        #pantalla-final h1 {
+            font-size: 27px;
+        }
+
+        #puntaje-final {
+            font-size: 24px;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="contenedor">
+
+        <!-- Pantalla de inicio -->
+        <section id="pantalla-inicio">
+            <h1>CUESTIONARIO LUNAR</h1>
+            <p>¿Cuánto sabes sobre las fases de la Luna?</p>
+            <p>Responde las 10 preguntas y descubre tu puntaje.</p>
+
+            <button id="boton-inicio" class="principal">
+                COMENZAR
+            </button>
+        </section>
+
+        <!-- Pantalla del juego -->
+        <section id="pantalla-juego" class="oculto">
+            <h2>CUESTIONARIO LUNAR</h2>
+
+            <p id="contador">Pregunta 1 de 10</p>
+
+            <p id="pregunta"></p>
+
+            <p id="resultado" aria-live="polite"></p>
+
+            <div id="respuestas" class="respuestas"></div>
+
+            <button id="boton-siguiente" class="principal oculto">
+                SIGUIENTE PREGUNTA
+            </button>
+        </section>
+
+        <!-- Pantalla final -->
+        <section id="pantalla-final" class="oculto">
+            <h1>¡JUEGO TERMINADO!</h1>
+
+            <p id="puntaje-final"></p>
+
+            <p id="mensaje-final"></p>
+
+            <button id="boton-reintentar" class="principal">
+                INTENTAR OTRA VEZ
+            </button>
+        </section>
+
+    </main>
+
+    <!-- Código Python ejecutado mediante PyScript -->
+    <script type="py">
+from pyscript import document
+import random
+
+# Preguntas, respuestas correctas y opciones
+preguntas = [
+    {
+        "pregunta": "¿Qué fase ocurre cuando la Luna está entre la Tierra y el Sol?",
+        "correcta": "Luna Nueva"
+    },
+    {
+        "pregunta": "¿Qué fase viene justo después de la Luna Nueva?",
+        "correcta": "Luna Creciente"
+    },
+    {
+        "pregunta": "¿Cómo se llama cuando vemos exactamente la mitad derecha iluminada?",
+        "correcta": "Cuarto Creciente"
+    },
+    {
+        "pregunta": "¿Qué fase muestra casi toda la superficie iluminada antes de llenarse?",
+        "correcta": "Gibosa Creciente"
+    },
+    {
+        "pregunta": "¿En qué fase la Tierra está entre el Sol y la Luna?",
+        "correcta": "Luna Llena"
+    },
+    {
+        "pregunta": "¿Qué fase viene decreciendo justo después de la Luna Llena?",
+        "correcta": "Gibosa Menguante"
+    },
+    {
+        "pregunta": "¿Cómo se llama cuando vemos exactamente la mitad izquierda iluminada?",
+        "correcta": "Cuarto Menguante"
+    },
+    {
+        "pregunta": "¿Qué fase es la última antes de volver a empezar el ciclo?",
+        "correcta": "Luna Menguante"
+    },
+    {
+        "pregunta": "¿Cuánto tarda aproximadamente el ciclo lunar completo?",
+        "correcta": "29 días"
+    },
+    {
+        "pregunta": "¿La Luna emite su propia luz?",
+        "correcta": "No, refleja la luz del Sol"
+    }
+]
+
+respuestas = [
+    "Luna Nueva",
+    "Luna Creciente",
+    "Cuarto Creciente",
+    "Gibosa Creciente",
+    "Luna Llena",
+    "Gibosa Menguante",
+    "Cuarto Menguante",
+    "Luna Menguante",
+    "29 días",
+    "No, refleja la luz del Sol"
+]
+
+# Variables del juego
+preguntas_disponibles = []
+pregunta_actual = None
+numero_pregunta = 0
+puntaje = 0
+respondida = False
+
+
+# Elementos HTML
+pantalla_inicio = document.querySelector("#pantalla-inicio")
+pantalla_juego = document.querySelector("#pantalla-juego")
+pantalla_final = document.querySelector("#pantalla-final")
+
+contador = document.querySelector("#contador")
+pregunta_html = document.querySelector("#pregunta")
+resultado = document.querySelector("#resultado")
+contenedor_respuestas = document.querySelector("#respuestas")
+
+boton_inicio = document.querySelector("#boton-inicio")
+boton_siguiente = document.querySelector("#boton-siguiente")
+boton_reintentar = document.querySelector("#boton-reintentar")
+
+puntaje_final = document.querySelector("#puntaje-final")
+mensaje_final = document.querySelector("#mensaje-final")
+
+
+def mostrar_pantalla(pantalla):
+    pantalla_inicio.classList.add("oculto")
+    pantalla_juego.classList.add("oculto")
+    pantalla_final.classList.add("oculto")
+
+    pantalla.classList.remove("oculto")
+
+
+def iniciar_juego(event=None):
+    global preguntas_disponibles, numero_pregunta, puntaje
+
+    preguntas_disponibles = list(range(len(preguntas)))
+    random.shuffle(preguntas_disponibles)
+
+    numero_pregunta = 0
+    puntaje = 0
+
+    mostrar_pantalla(pantalla_juego)
+    siguiente_pregunta()
+
+
+def siguiente_pregunta(event=None):
+    global pregunta_actual, respondida
+
+    # Terminar cuando se respondieron las 10 preguntas
+    if numero_pregunta >= len(preguntas):
+        terminar_juego()
+        return
+
+    respondida = False
+
+    indice = preguntas_disponibles[numero_pregunta]
+    pregunta_actual = preguntas[indice]
+
+    contador.textContent = (
+        f"Pregunta {numero_pregunta + 1} de {len(preguntas)}"
+    )
+
+    pregunta_html.textContent = pregunta_actual["pregunta"]
+
+    resultado.textContent = ""
+    resultado.className = ""
+
+    boton_siguiente.classList.add("oculto")
+
+    # Mezclar las respuestas para que no estén siempre en el mismo orden
+    opciones = respuestas.copy()
+    random.shuffle(opciones)
+
+    # Eliminar los botones de la pregunta anterior
+    contenedor_respuestas.innerHTML = ""
+
+    # Crear los nuevos botones
+    for texto in opciones:
+        boton = document.createElement("button")
+        boton.textContent = texto
+        boton.className = "respuesta"
+
+        boton.addEventListener(
+            "click",
+            lambda event, respuesta=texto: comprobar(respuesta)
+        )
+
+        contenedor_respuestas.appendChild(boton)
+
+
+def comprobar(respuesta):
+    global puntaje, numero_pregunta, respondida
+
+    # Evitar que se responda varias veces la misma pregunta
+    if respondida:
+        return
+
+    respondida = True
+
+    if respuesta == pregunta_actual["correcta"]:
+        resultado.textContent = "¡CORRECTO!"
+        resultado.className = "correcto"
+        puntaje += 1
+    else:
+        resultado.textContent = (
+            f"INCORRECTO. La respuesta correcta es: "
+            f"{pregunta_actual['correcta']}"
+        )
+        resultado.className = "incorrecto"
+
+    # Desactivar las opciones después de responder
+    botones = contenedor_respuestas.querySelectorAll("button")
+
+    for boton in botones:
+        boton.disabled = True
+
+        if boton.textContent == pregunta_actual["correcta"]:
+            boton.style.backgroundColor = "#a8f0b0"
+
+        elif boton.textContent == respuesta:
+            boton.style.backgroundColor = "#ffb3b3"
+
+    numero_pregunta += 1
+
+    if numero_pregunta < len(preguntas):
+        boton_siguiente.textContent = "SIGUIENTE PREGUNTA"
+    else:
+        boton_siguiente.textContent = "VER RESULTADO FINAL"
+
+    boton_siguiente.classList.remove("oculto")
+
+
+def terminar_juego():
+    mostrar_pantalla(pantalla_final)
+
+    puntaje_final.textContent = (
+        f"Puntaje: {puntaje} de {len(preguntas)}"
+    )
+
+    if puntaje == 10:
+        mensaje_final.textContent = "¡Excelente! ¡Sabes muchísimo sobre la Luna!"
+    elif puntaje >= 7:
+        mensaje_final.textContent = "¡Muy bien! Conoces bastante sobre las fases lunares."
+    elif puntaje >= 4:
+        mensaje_final.textContent = "¡Buen intento! Sigue aprendiendo sobre la Luna."
+    else:
+        mensaje_final.textContent = "¡Sigue practicando! Puedes volver a intentarlo."
+
+
+# Conectar los botones con las funciones de Python
+boton_inicio.addEventListener("click", iniciar_juego)
+boton_siguiente.addEventListener("click", siguiente_pregunta)
+boton_reintentar.addEventListener("click", iniciar_juego)
+    </script>
+
+</body>
+</html>
